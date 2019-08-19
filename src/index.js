@@ -55,6 +55,7 @@ export default class ScrollCalendar extends Component {
       enableYearTitle: this.props.enableYearTitle,
       enableMonthTitle: this.props.enableMonthTitle,
       weekStartsOnMonday: this.props.weekStartsOnMonday === undefined ? false : this.props.weekStartsOnMonday,
+      renderMonthHeader: this.props.renderMonthHeader,
     };
     return (
       <RenderCalendarYear {...props} />
@@ -81,10 +82,18 @@ export const RenderCalendarYear = props => {
 };
 
 export const RenderMonthCard = props => {
+  console.log("props=", props);
+  const renderMonthHeader = () => {
+    if(props.renderMonthHeader !== undefined) {
+      return props.renderMonthHeader({ date: now });
+    } else {
+      return (<RenderMonthHeader date={now} {...props}/>);
+    }
+  };
   let now = props.currentMonth;
   return (
     <section className="month" id={now.format('MMMM-YYYY')}>
-      <RenderMonthHeader date={now} {...props}/>
+      { renderMonthHeader() }
       <RenderDayHeader {...props} />
       <RenderDays date={now} {...props} />
     </section>

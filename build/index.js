@@ -17006,7 +17006,8 @@ var ScrollCalendar = function (_Component) {
         monthFormat: this.props.monthFormat,
         enableYearTitle: this.props.enableYearTitle,
         enableMonthTitle: this.props.enableMonthTitle,
-        weekStartsOnMonday: this.props.weekStartsOnMonday === undefined ? false : this.props.weekStartsOnMonday
+        weekStartsOnMonday: this.props.weekStartsOnMonday === undefined ? false : this.props.weekStartsOnMonday,
+        renderMonthHeader: this.props.renderMonthHeader
       };
       return _react2.default.createElement(RenderCalendarYear, props);
     }
@@ -17035,11 +17036,19 @@ var RenderCalendarYear = exports.RenderCalendarYear = function RenderCalendarYea
 };
 
 var RenderMonthCard = exports.RenderMonthCard = function RenderMonthCard(props) {
+  console.log("props=", props);
+  var renderMonthHeader = function renderMonthHeader() {
+    if (props.renderMonthHeader !== undefined) {
+      return props.renderMonthHeader({ date: now });
+    } else {
+      return _react2.default.createElement(RenderMonthHeader, _extends({ date: now }, props));
+    }
+  };
   var now = props.currentMonth;
   return _react2.default.createElement(
     'section',
     { className: 'month', id: now.format('MMMM-YYYY') },
-    _react2.default.createElement(RenderMonthHeader, _extends({ date: now }, props)),
+    renderMonthHeader(),
     _react2.default.createElement(RenderDayHeader, props),
     _react2.default.createElement(RenderDays, _extends({ date: now }, props))
   );

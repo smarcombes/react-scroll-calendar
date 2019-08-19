@@ -103,28 +103,29 @@ export const RenderMonthHeader = props => {
 };
 
 export const RenderDayHeader = ({ weekStartsOnMonday }) => {
+  const weekDays = moment.weekdaysMin();
   if(weekStartsOnMonday) {
     return (
       <ul className="days">
-        <li key={'Monday'}>Mo</li>
-        <li key={'Tuesday'}>Tu</li>
-        <li key={'Wednesday'}>We</li>
-        <li key={'Thursday'}>Th</li>
-        <li key={'Friday'}>Fr</li>
-        <li key={'Saturday'}>Sa</li>
-        <li key={'Sunday'}>Su</li>
+        <li key={'Monday'}>{weekDays[1]}</li>
+        <li key={'Tuesday'}>{weekDays[2]}</li>
+        <li key={'Wednesday'}>{weekDays[3]}</li>
+        <li key={'Thursday'}>{weekDays[4]}</li>
+        <li key={'Friday'}>{weekDays[5]}</li>
+        <li key={'Saturday'}>{weekDays[6]}</li>
+        <li key={'Sunday'}>{weekDays[0]}</li>
       </ul>
     );
   } else {
     return (
       <ul className="days">
-        <li key={'Sunday'}>Su</li>
-        <li key={'Monday'}>Mo</li>
-        <li key={'Tuesday'}>Tu</li>
-        <li key={'Wednesday'}>We</li>
-        <li key={'Thursday'}>Th</li>
-        <li key={'Friday'}>Fr</li>
-        <li key={'Saturday'}>Sa</li>
+      <li key={'Sunday'}>{weekDays[0]}</li>
+      <li key={'Monday'}>{weekDays[1]}</li>
+      <li key={'Tuesday'}>{weekDays[2]}</li>
+      <li key={'Wednesday'}>{weekDays[3]}</li>
+      <li key={'Thursday'}>{weekDays[4]}</li>
+      <li key={'Friday'}>{weekDays[5]}</li>
+      <li key={'Saturday'}>{weekDays[6]}</li>
       </ul>
     );
   }

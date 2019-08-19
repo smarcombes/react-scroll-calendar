@@ -17005,7 +17005,8 @@ var ScrollCalendar = function (_Component) {
         yearFormat: this.props.yearFormat,
         monthFormat: this.props.monthFormat,
         enableYearTitle: this.props.enableYearTitle,
-        enableMonthTitle: this.props.enableMonthTitle
+        enableMonthTitle: this.props.enableMonthTitle,
+        weekStartsOnMonday: this.props.weekStartsOnMonday === undefined ? false : this.props.weekStartsOnMonday
       };
       return _react2.default.createElement(RenderCalendarYear, props);
     }
@@ -17039,7 +17040,7 @@ var RenderMonthCard = exports.RenderMonthCard = function RenderMonthCard(props) 
     'section',
     { className: 'month', id: now.format('MMMM-YYYY') },
     _react2.default.createElement(RenderMonthHeader, _extends({ date: now }, props)),
-    _react2.default.createElement(RenderDayHeader, null),
+    _react2.default.createElement(RenderDayHeader, props),
     _react2.default.createElement(RenderDays, _extends({ date: now }, props))
   );
 };
@@ -17059,54 +17060,99 @@ var RenderMonthHeader = exports.RenderMonthHeader = function RenderMonthHeader(p
   );
 };
 
-var RenderDayHeader = exports.RenderDayHeader = function RenderDayHeader() {
-  return _react2.default.createElement(
-    'ul',
-    { className: 'days' },
-    _react2.default.createElement(
-      'li',
-      { key: 'Sunday' },
-      'Su'
-    ),
-    _react2.default.createElement(
-      'li',
-      { key: 'Monday' },
-      'Mo'
-    ),
-    _react2.default.createElement(
-      'li',
-      { key: 'Tuesday' },
-      'Tu'
-    ),
-    _react2.default.createElement(
-      'li',
-      { key: 'Wednesday' },
-      'We'
-    ),
-    _react2.default.createElement(
-      'li',
-      { key: 'Thursday' },
-      'Th'
-    ),
-    _react2.default.createElement(
-      'li',
-      { key: 'Friday' },
-      'Fr'
-    ),
-    _react2.default.createElement(
-      'li',
-      { key: 'Saturday' },
-      'Sa'
-    )
-  );
+var RenderDayHeader = exports.RenderDayHeader = function RenderDayHeader(_ref) {
+  var weekStartsOnMonday = _ref.weekStartsOnMonday;
+
+  var weekDays = _moment2.default.weekdaysMin();
+  if (weekStartsOnMonday) {
+    return _react2.default.createElement(
+      'ul',
+      { className: 'days' },
+      _react2.default.createElement(
+        'li',
+        { key: 'Monday' },
+        weekDays[1]
+      ),
+      _react2.default.createElement(
+        'li',
+        { key: 'Tuesday' },
+        weekDays[2]
+      ),
+      _react2.default.createElement(
+        'li',
+        { key: 'Wednesday' },
+        weekDays[3]
+      ),
+      _react2.default.createElement(
+        'li',
+        { key: 'Thursday' },
+        weekDays[4]
+      ),
+      _react2.default.createElement(
+        'li',
+        { key: 'Friday' },
+        weekDays[5]
+      ),
+      _react2.default.createElement(
+        'li',
+        { key: 'Saturday' },
+        weekDays[6]
+      ),
+      _react2.default.createElement(
+        'li',
+        { key: 'Sunday' },
+        weekDays[0]
+      )
+    );
+  } else {
+    return _react2.default.createElement(
+      'ul',
+      { className: 'days' },
+      _react2.default.createElement(
+        'li',
+        { key: 'Sunday' },
+        weekDays[0]
+      ),
+      _react2.default.createElement(
+        'li',
+        { key: 'Monday' },
+        weekDays[1]
+      ),
+      _react2.default.createElement(
+        'li',
+        { key: 'Tuesday' },
+        weekDays[2]
+      ),
+      _react2.default.createElement(
+        'li',
+        { key: 'Wednesday' },
+        weekDays[3]
+      ),
+      _react2.default.createElement(
+        'li',
+        { key: 'Thursday' },
+        weekDays[4]
+      ),
+      _react2.default.createElement(
+        'li',
+        { key: 'Friday' },
+        weekDays[5]
+      ),
+      _react2.default.createElement(
+        'li',
+        { key: 'Saturday' },
+        weekDays[6]
+      )
+    );
+  }
 };
 
-var RenderSingleDay = exports.RenderSingleDay = function RenderSingleDay(_ref) {
-  var isActive = _ref.isActive,
-      handleClick = _ref.handleClick,
-      currentValue = _ref.currentValue,
-      isDisabled = _ref.isDisabled,
-      i = _ref.i;
+var RenderSingleDay = exports.RenderSingleDay = function RenderSingleDay(_ref2) {
+  var isActive = _ref2.isActive,
+      handleClick = _ref2.handleClick,
+      currentValue = _ref2.currentValue,
+      isDisabled = _ref2.isDisabled,
+      i = _ref2.i;
 
   var className = '' + (isActive ? 'active' : '') + (isDisabled ? 'disabled' : '');
   return _react2.default.createElement(
@@ -17125,16 +17171,30 @@ var RenderSingleDay = exports.RenderSingleDay = function RenderSingleDay(_ref) {
   );
 };
 
-var RenderDays = exports.RenderDays = function RenderDays(_ref2) {
-  var date = _ref2.date,
-      selectedDate = _ref2.selectedDate,
-      handleSelect = _ref2.handleSelect,
-      minDate = _ref2.minDate,
-      maxDate = _ref2.maxDate;
+var RenderDays = exports.RenderDays = function RenderDays(_ref3) {
+  var date = _ref3.date,
+      selectedDate = _ref3.selectedDate,
+      handleSelect = _ref3.handleSelect,
+      minDate = _ref3.minDate,
+      maxDate = _ref3.maxDate,
+      weekStartsOnMonday = _ref3.weekStartsOnMonday;
+
+  var getDay = function getDay(date) {
+    var jsDay = date.day();
+    if (weekStartsOnMonday) {
+      if (jsDay === 0) {
+        return 6;
+      } else {
+        return jsDay - 1;
+      }
+    } else {
+      return jsDay;
+    }
+  };
 
   var daysInMonth = date.daysInMonth();
   var startDate = date.startOf('month');
-  var balanceDayCount = startDate.day();
+  var balanceDayCount = getDay(startDate);
 
   var renderDay = function renderDay() {
     var elements = [];

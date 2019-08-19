@@ -53,7 +53,8 @@ export default class ScrollCalendar extends Component {
       yearFormat: this.props.yearFormat,
       monthFormat: this.props.monthFormat,
       enableYearTitle: this.props.enableYearTitle,
-      enableMonthTitle: this.props.enableMonthTitle
+      enableMonthTitle: this.props.enableMonthTitle,
+      weekStartsOnMonday: this.props.weekStartsOnMonday === undefined ? false : this.props.weekStartsOnMonday,
     };
     return (
       <RenderCalendarYear {...props} />
@@ -84,7 +85,7 @@ export const RenderMonthCard = props => {
   return (
     <section className="month" id={now.format('MMMM-YYYY')}>
       <RenderMonthHeader date={now} {...props}/>
-      <RenderDayHeader />
+      <RenderDayHeader {...props} />
       <RenderDays date={now} {...props} />
     </section>
   );
@@ -101,18 +102,32 @@ export const RenderMonthHeader = props => {
   );
 };
 
-export const RenderDayHeader = () => {
-  return (
-    <ul className="days">
-      <li key={'Sunday'}>Su</li>
-      <li key={'Monday'}>Mo</li>
-      <li key={'Tuesday'}>Tu</li>
-      <li key={'Wednesday'}>We</li>
-      <li key={'Thursday'}>Th</li>
-      <li key={'Friday'}>Fr</li>
-      <li key={'Saturday'}>Sa</li>
-    </ul>
-  );
+export const RenderDayHeader = ({ weekStartsOnMonday }) => {
+  if(weekStartsOnMonday) {
+    return (
+      <ul className="days">
+        <li key={'Monday'}>Mo</li>
+        <li key={'Tuesday'}>Tu</li>
+        <li key={'Wednesday'}>We</li>
+        <li key={'Thursday'}>Th</li>
+        <li key={'Friday'}>Fr</li>
+        <li key={'Saturday'}>Sa</li>
+        <li key={'Sunday'}>Su</li>
+      </ul>
+    );
+  } else {
+    return (
+      <ul className="days">
+        <li key={'Sunday'}>Su</li>
+        <li key={'Monday'}>Mo</li>
+        <li key={'Tuesday'}>Tu</li>
+        <li key={'Wednesday'}>We</li>
+        <li key={'Thursday'}>Th</li>
+        <li key={'Friday'}>Fr</li>
+        <li key={'Saturday'}>Sa</li>
+      </ul>
+    );
+  }
 };
 
 export const RenderSingleDay = ({
@@ -138,11 +153,25 @@ export const RenderDays = ({
   selectedDate,
   handleSelect,
   minDate,
-  maxDate
+  maxDate,
+  weekStartsOnMonday
 }) => {
+  const getDay = (date) => {
+    const jsDay = date.day();
+    if(weekStartsOnMonday) {
+      if(jsDay === 0) {
+        return 6;
+      } else {
+        return jsDay - 1;
+      }
+    } else {
+      return jsDay;
+    }
+  }
+
   let daysInMonth = date.daysInMonth();
   let startDate = date.startOf('month');
-  let balanceDayCount = startDate.day();
+  let balanceDayCount = getDay(startDate);
 
   let renderDay = () => {
     let elements = [];

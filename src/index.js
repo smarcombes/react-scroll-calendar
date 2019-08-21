@@ -15,36 +15,35 @@ const PERIOD_SELECTION_STATES = {
 export default class ScrollCalendar extends Component {
   constructor(props) {
     super(props);
-    this.state = {
-      selectionState: PERIOD_SELECTION_STATES.NO_SELECTION,
-      startDate: null,
-      endDate: null,
-    };
-
     this.handleSelectedDate = this.handleSelectedDate.bind(this);
-    this.setSelectedDate = this.setSelectedDate.bind(this);
   }
 
   handleSelectedDate(e, value) {
+    let selectedValue = Object.assign({}, this.props.value);
+    const selectionState = ((selectedValue) => {
+      if(selectedValue === undefined) {
+        return PERIOD_SELECTION_STATES.NO_SELECTION;
+      } else if(moment.isMoment(selectedValue)) {
+        return PERIOD_SELECTION_STATES.ONE_DATE_SELECTED;
+      } else if(moment.isMoment(selectedValue.startDate) && !moment.isMoment(selectedValue.endDate)) {
+        return PERIOD_SELECTION_STATES.ONE_DATE_SELECTED;
+      } else {
+        return PERIOD_SELECTION_STATES.PERIOD_SELECTED;
+      }
+    })(selectedValue);
     e && e.preventDefault();
     if(!this.props.periodSelection ||(
-      this.state.selectionState === PERIOD_SELECTION_STATES.NO_SELECTION ||
-      this.state.selectionState === PERIOD_SELECTION_STATES.PERIOD_SELECTED)) {
-      this.setState({
-        selectionState: PERIOD_SELECTION_STATES.ONE_DATE_SELECTED,
-        startDate: value,
-        endDate: undefined,
-      });
+      selectionState === PERIOD_SELECTION_STATES.NO_SELECTION ||
+      selectionState === PERIOD_SELECTION_STATES.PERIOD_SELECTED)) {
       if(this.props.onSelect) {
-        this.props.onSelect(value);
-      }
-    } else if(this.state.selectionState === PERIOD_SELECTION_STATES.ONE_DATE_SELECTED) {
-      const { startDate } = this.state;
-      if(startDate.isBefore(value)) {
-        this.setState({
-          selectionState: PERIOD_SELECTION_STATES.PERIOD_SELECTED,
-          endDate: value,
+        this.props.onSelect({
+          startDate: value,
+          endDate: undefined 
         });
+      }
+    } else if(selectionState === PERIOD_SELECTION_STATES.ONE_DATE_SELECTED) {
+      const { startDate } = selectedValue;
+      if(startDate.isBefore(value)) {
         if(this.props.onSelect) {
           this.props.onSelect({
             startDate: startDate,
@@ -52,11 +51,6 @@ export default class ScrollCalendar extends Component {
           });
         }
       } else if(startDate.isAfter(value)) {
-        this.setState({
-          selectionState: PERIOD_SELECTION_STATES.PERIOD_SELECTED,
-          startDate: value,
-          endDate: startDate,
-        });
         if(this.props.onSelect) {
           this.props.onSelect({
             startDate: value,
@@ -64,22 +58,6 @@ export default class ScrollCalendar extends Component {
           });
         }
       }
-    }
-  }
-
-  setSelectedDate(date) {
-    this.setState({
-      selectedDate: date
-    });
-  }
-
-  componentDidMount() {
-    this.setSelectedDate(this.props.selectedDate);
-    let element = document.getElementById(
-      moment(this.props.selectedDate, 'DD/MMM/YYYY').format('MMMM-YYYY')
-    );
-    if (element) {
-      element.scrollIntoView();
     }
   }
 
@@ -93,8 +71,6 @@ export default class ScrollCalendar extends Component {
     let props = {
       minDate: this.props.minDate,
       maxDate: this.props.maxDate,
-      startDate: this.state.startDate,
-      endDate: this.state.endDate,
       handleSelect: this.handleSelectedDate,
       className: this.props.className + ' mobile-datepicker',
       yearFormat: this.props.yearFormat,
@@ -102,9 +78,17 @@ export default class ScrollCalendar extends Component {
       enableYearTitle: this.props.enableYearTitle,
       enableMonthTitle: this.props.enableMonthTitle,
       weekStartsOnMonday: this.props.weekStartsOnMonday === undefined ? false : this.props.weekStartsOnMonday,
+      renderDay: this.props.renderDay,
       renderMonthHeader: this.props.renderMonthHeader,
       periodSelection: this.props.periodSelection,
     };
+    if(this.props.value !== undefined) {
+      if(moment.isMoment(this.props.value)) {
+        props.startDate = this.props.value;
+      } else {
+        props = { ...this.props.value, ...props };
+      }
+    }
     return (
       <RenderCalendarYear {...props} />
     );
@@ -190,23 +174,20 @@ export const RenderDayHeader = ({ weekStartsOnMonday }) => {
 export const RenderSingleDay = ({
   isActive,
   isInSelectedPeriod,
-  handleClick,
   currentValue,
-  isDisabled,
-  i
+  isDisabled
 }) => {
   let className = (
-    '' + (isActive ? 'active' : '') +
-    (isDisabled ? 'disabled' : '') +
+    '' + (isActive ? ' active' : '') +
+    (isDisabled ? ' disabled' : '') +
     (isInSelectedPeriod ? ' active-period' : '')
   );
   return (
-    <li
+    <div
       className={className}
-      key={i}
     >
-      <span onClick={e => handleClick(e, currentValue)}>{currentValue.date()}</span>
-    </li>
+      <span>{currentValue.date()}</span>
+    </div>
   );
 };
 
@@ -217,7 +198,8 @@ export const RenderDays = ({
   handleSelect,
   minDate,
   maxDate,
-  weekStartsOnMonday
+  weekStartsOnMonday,
+  renderDay
 }) => {
   const getDay = (date) => {
     const jsDay = date.day();
@@ -235,26 +217,40 @@ export const RenderDays = ({
   let daysInMonth = date.daysInMonth();
   let monthStartDate = date.startOf('month');
   let balanceDayCount = getDay(monthStartDate);
+  let renderDayFun = (props) => {
+    if(renderDay !== undefined) {
+      return renderDay(props);
+    } else {
+      return <RenderSingleDay {...props}/>;
+    }
+  };
 
-  let renderDay = () => {
+  let renderDays = () => {
     let elements = [];
     let now = moment(date, 'DD/MMM/YYYY');
+    let dayProps; 
     for (let i = 1; i <= daysInMonth; i++) {
+      let day = now.clone();
+      dayProps = {
+        isInSelectedPeriod: day.isSameOrAfter(startDate) && day.isSameOrBefore(endDate),
+        isActive: isSameDate(day.clone(), startDate) || isSameDate(day.clone(), endDate),
+        isDisabled: isDisabled(minDate, day.clone(), maxDate),
+        currentValue: day.clone(),
+      }
       elements.push(
-        <RenderSingleDay
-          isInSelectedPeriod={now.isSameOrAfter(startDate) && now.isSameOrBefore(endDate)}
-          isActive={isSameDate(now.clone(), startDate) || isSameDate(now.clone(), endDate)}
-          isDisabled={isDisabled(minDate, now.clone(), maxDate)}
-          handleClick={handleSelect}
-          currentValue={now.clone()}
+        <li
           key={i}
-        />
+          className="day-container"
+          onClick={e => handleSelect(e, day)}
+        >
+          { renderDayFun(dayProps) }
+        </li>
       );
       now = now.add(1, 'days');
     }
     return elements;
   };
-  let renderUnwantedDay = balanceDayCount => {
+  let renderPlaceholderDays = balanceDayCount => {
     let elements = [];
     for (let i = 0; i < balanceDayCount; i++) {
       elements.push(<li className="visible-hidden" key={i} />);
@@ -263,8 +259,8 @@ export const RenderDays = ({
   };
   return (
     <ul className="date">
-      {renderUnwantedDay(balanceDayCount)}
-      {renderDay()}
+      {renderPlaceholderDays(balanceDayCount)}
+      {renderDays()}
     </ul>
   );
 };
@@ -272,7 +268,7 @@ export const RenderDays = ({
 ScrollCalendar.defaultProps = {
   minDate: moment().add(1, 'd'),
   maxDate: moment().add(9, 'M'),
-  selectedDate: null,
+  value: null,
   monthFormat: 'MMMM',
   yearFormat: 'YYYY',
   enableYearTitle: true,

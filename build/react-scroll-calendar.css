@@ -170,19 +170,19 @@
   text-decoration: none;
   cursor: pointer;
 }
-.mobile-datepicker .month ul.date li.active span {
+.mobile-datepicker .month ul.date li .active span {
   background-color: #53576d;
   font-weight: 700;
   color: #ffffff;
 }
-.mobile-datepicker .month ul.date li.disabled {
+.mobile-datepicker .month ul.date li .disabled {
   pointer-events: none;
 }
-.mobile-datepicker .month ul.date li.disabled span {
+.mobile-datepicker .month ul.date li .disabled span {
   color: #cccccc;
   cursor: not-allowed;
 }
-.mobile-datepicker .month ul.date li.vis-hidden {
+.mobile-datepicker .month ul.date li .vis-hidden {
   opacity: 0;
   filter: alpha(opacity=0);
   visibility: hidden;

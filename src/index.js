@@ -2,6 +2,10 @@ import React, { Component } from 'react';
 import moment from 'moment';
 import { isSameDate, isDisabled } from './utils/utils';
 
+export function setMomentLocale(locale) {
+  moment.locale(locale);
+};
+
 export default class ScrollCalendar extends Component {
   constructor(props) {
     super(props);
@@ -82,7 +86,6 @@ export const RenderCalendarYear = props => {
 };
 
 export const RenderMonthCard = props => {
-  console.log("props=", props);
   const renderMonthHeader = () => {
     if(props.renderMonthHeader !== undefined) {
       return props.renderMonthHeader({ date: now });

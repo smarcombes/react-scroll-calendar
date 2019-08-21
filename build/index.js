@@ -16950,6 +16950,12 @@ function setMomentLocale(locale) {
   _moment2.default.locale(locale);
 };
 
+var PERIOD_SELECTION_STATES = {
+  NO_SELECTION: 0,
+  ONE_DATE_SELECTED: 1,
+  PERIOD_SELECTED: 2
+};
+
 var ScrollCalendar = function (_Component) {
   _inherits(ScrollCalendar, _Component);
 
@@ -16959,7 +16965,9 @@ var ScrollCalendar = function (_Component) {
     var _this = _possibleConstructorReturn(this, (ScrollCalendar.__proto__ || Object.getPrototypeOf(ScrollCalendar)).call(this, props));
 
     _this.state = {
-      selectedDate: null
+      selectionState: PERIOD_SELECTION_STATES.NO_SELECTION,
+      startDate: null,
+      endDate: null
     };
 
     _this.handleSelectedDate = _this.handleSelectedDate.bind(_this);
@@ -16971,9 +16979,42 @@ var ScrollCalendar = function (_Component) {
     key: 'handleSelectedDate',
     value: function handleSelectedDate(e, value) {
       e && e.preventDefault();
-      this.setSelectedDate(value);
-      if (this.props.onSelect) {
-        this.props.onSelect(value);
+      if (!this.props.periodSelection || this.state.selectionState === PERIOD_SELECTION_STATES.NO_SELECTION || this.state.selectionState === PERIOD_SELECTION_STATES.PERIOD_SELECTED) {
+        this.setState({
+          selectionState: PERIOD_SELECTION_STATES.ONE_DATE_SELECTED,
+          startDate: value,
+          endDate: undefined
+        });
+        if (this.props.onSelect) {
+          this.props.onSelect(value);
+        }
+      } else if (this.state.selectionState === PERIOD_SELECTION_STATES.ONE_DATE_SELECTED) {
+        var startDate = this.state.startDate;
+
+        if (startDate.isBefore(value)) {
+          this.setState({
+            selectionState: PERIOD_SELECTION_STATES.PERIOD_SELECTED,
+            endDate: value
+          });
+          if (this.props.onSelect) {
+            this.props.onSelect({
+              startDate: startDate,
+              endDate: value
+            });
+          }
+        } else if (startDate.isAfter(value)) {
+          this.setState({
+            selectionState: PERIOD_SELECTION_STATES.PERIOD_SELECTED,
+            startDate: value,
+            endDate: startDate
+          });
+          if (this.props.onSelect) {
+            this.props.onSelect({
+              startDate: value,
+              endDate: startDate
+            });
+          }
+        }
       }
     }
   }, {
@@ -17005,7 +17046,8 @@ var ScrollCalendar = function (_Component) {
       var props = {
         minDate: this.props.minDate,
         maxDate: this.props.maxDate,
-        selectedDate: this.state.selectedDate,
+        startDate: this.state.startDate,
+        endDate: this.state.endDate,
         handleSelect: this.handleSelectedDate,
         className: this.props.className + ' mobile-datepicker',
         yearFormat: this.props.yearFormat,
@@ -17013,7 +17055,8 @@ var ScrollCalendar = function (_Component) {
         enableYearTitle: this.props.enableYearTitle,
         enableMonthTitle: this.props.enableMonthTitle,
         weekStartsOnMonday: this.props.weekStartsOnMonday === undefined ? false : this.props.weekStartsOnMonday,
-        renderMonthHeader: this.props.renderMonthHeader
+        renderMonthHeader: this.props.renderMonthHeader,
+        periodSelection: this.props.periodSelection
       };
       return _react2.default.createElement(RenderCalendarYear, props);
     }
@@ -17163,12 +17206,13 @@ var RenderDayHeader = exports.RenderDayHeader = function RenderDayHeader(_ref) {
 
 var RenderSingleDay = exports.RenderSingleDay = function RenderSingleDay(_ref2) {
   var isActive = _ref2.isActive,
+      isInSelectedPeriod = _ref2.isInSelectedPeriod,
       handleClick = _ref2.handleClick,
       currentValue = _ref2.currentValue,
       isDisabled = _ref2.isDisabled,
       i = _ref2.i;
 
-  var className = '' + (isActive ? 'active' : '') + (isDisabled ? 'disabled' : '');
+  var className = '' + (isActive ? 'active' : '') + (isDisabled ? 'disabled' : '') + (isInSelectedPeriod ? ' active-period' : '');
   return _react2.default.createElement(
     'li',
     {
@@ -17187,7 +17231,8 @@ var RenderSingleDay = exports.RenderSingleDay = function RenderSingleDay(_ref2) 
 
 var RenderDays = exports.RenderDays = function RenderDays(_ref3) {
   var date = _ref3.date,
-      selectedDate = _ref3.selectedDate,
+      startDate = _ref3.startDate,
+      endDate = _ref3.endDate,
       handleSelect = _ref3.handleSelect,
       minDate = _ref3.minDate,
       maxDate = _ref3.maxDate,
@@ -17207,15 +17252,16 @@ var RenderDays = exports.RenderDays = function RenderDays(_ref3) {
   };
 
   var daysInMonth = date.daysInMonth();
-  var startDate = date.startOf('month');
-  var balanceDayCount = getDay(startDate);
+  var monthStartDate = date.startOf('month');
+  var balanceDayCount = getDay(monthStartDate);
 
   var renderDay = function renderDay() {
     var elements = [];
     var now = (0, _moment2.default)(date, 'DD/MMM/YYYY');
     for (var i = 1; i <= daysInMonth; i++) {
       elements.push(_react2.default.createElement(RenderSingleDay, {
-        isActive: (0, _utils.isSameDate)(now.clone(), selectedDate),
+        isInSelectedPeriod: now.isSameOrAfter(startDate) && now.isSameOrBefore(endDate),
+        isActive: (0, _utils.isSameDate)(now.clone(), startDate) || (0, _utils.isSameDate)(now.clone(), endDate),
         isDisabled: (0, _utils.isDisabled)(minDate, now.clone(), maxDate),
         handleClick: handleSelect,
         currentValue: now.clone(),
@@ -17247,7 +17293,8 @@ ScrollCalendar.defaultProps = {
   monthFormat: 'MMMM',
   yearFormat: 'YYYY',
   enableYearTitle: true,
-  enableMonthTitle: true
+  enableMonthTitle: true,
+  periodSelection: false
 };
 
 /***/ }),

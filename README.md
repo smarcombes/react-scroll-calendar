@@ -56,17 +56,33 @@ render(
 ```
 
 ### Prop Types
-| Property             | Type     | Default                | Description                                                   |                                                                               
-|:---------------------|:---------|:-----------------------|:--------------------------------------------------------------|
-| minDate              | moment   | `moment().add(1, 'd')` | The minimum date that is selectable.                          |
-| maxDate              | moment   | `moment().add(9, 'M')` | The maximum date that is selectable.                          |
-| selectedDate         | moment   | null                   | The selected date of the calendar.                            |
-| className            | String   | null                   | Optional CSS class name to append to the root element.        |  
-| onSelect             | Function |                        | Callback invoked after select() returns the current selected. |
-| monthFormat          | String   | `MMMM`                 | Label format for the month title.                             |
-| yearFormat           | String   | `YYYY`                 | Label format for the year title.                              |
-| enableYearTitle      | Boolean   | true                  | Option to enable / disable the year in header.                |
-| enableMonthTitle     | Boolean   | true                  | Option to enable / disable the month in header.               |
+| Property             | Type             | Default                | Description                                                      |                                                                               
+|:---------------------|:-----------------|:-----------------------|:-----------------------------------------------------------------|
+| minDate              | moment           | `moment().add(1, 'd')` | The minimum date that is selectable.                             |
+| maxDate              | moment           | `moment().add(9, 'M')` | The maximum date that is selectable.                             |
+| value                | moment or Object | null                   | The selected date of the calendar.                               |
+| className            | String           | null                   | Optional CSS class name to append to the root element.           |  
+| onSelect             | Function         | undefined              | Callback invoked after select() returns the current selected.    |
+| monthFormat          | String           | `MMMM`                 | Label format for the month title.                                |
+| yearFormat           | String           | `YYYY`                 | Label format for the year title.                                 |
+| enableYearTitle      | Boolean          | true                   | Option to enable / disable the year in header.                   |
+| enableMonthTitle     | Boolean          | true                   | Option to enable / disable the month in header.                  |
+| periodSelection      | Boolean          | false                  | If true, period can be selected (2 dates), otherwise just 1      |
+| weekStartsOnMonday   | Boolean          | false                  | If true, weeks are rendered starting on Monday, otherwise Sunday | 
+| renderDay            | Function         | undefined              | Render function for single day content rendering                 |
+| renderMonthHeader    | Function         | undefined              | Render function for month header rendering                       |
+
+### i18n
+
+Week day names and month day names are retrieved from `moment.js`, so in order to translate those strings, one has to set `moment.js`
+locale to the required value. Unfortunately, I was not able to make `moment.js` as a peer dependency of this package work as intended,
+so `react-scroll-calendar` contains its own copy of the module. One can set locale for it using the exported function `setMomentLocale()`:  
+
+```js
+import { setMomentLocale } from 'react-scroll-calendar';
+
+setMomentLocale("ru");
+```
 
 Compatibility
 ------------

@@ -236,12 +236,16 @@ export const RenderDays = ({
         isActive: isSameDate(day.clone(), startDate) || isSameDate(day.clone(), endDate),
         isDisabled: isDisabled(minDate, day.clone(), maxDate),
         currentValue: day.clone(),
+      };
+      let clickHandlerProp = {};
+      if(!dayProps.isDisabled) {
+        clickHandlerProp = {onClick: e => handleSelect(e, day)};
       }
       elements.push(
         <li
           key={i}
           className="day-container"
-          onClick={e => handleSelect(e, day)}
+          {...clickHandlerProp}
         >
           { renderDayFun(dayProps) }
         </li>

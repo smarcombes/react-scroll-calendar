@@ -17255,15 +17255,18 @@ var RenderDays = exports.RenderDays = function RenderDays(_ref3) {
         isDisabled: (0, _utils.isDisabled)(minDate, day.clone(), maxDate),
         currentValue: day.clone()
       };
+      var clickHandlerProp = {};
+      if (!dayProps.isDisabled) {
+        clickHandlerProp = { onClick: function onClick(e) {
+            return handleSelect(e, day);
+          } };
+      }
       elements.push(_react2.default.createElement(
         'li',
-        {
+        _extends({
           key: i,
-          className: 'day-container',
-          onClick: function onClick(e) {
-            return handleSelect(e, day);
-          }
-        },
+          className: 'day-container'
+        }, clickHandlerProp),
         renderDayFun(dayProps)
       ));
       now = now.add(1, 'days');

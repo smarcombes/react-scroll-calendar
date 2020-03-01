@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import moment from 'moment';
+import ucfirst from 'ucfirst';
 import { isSameDate, isDisabled } from './utils/utils';
 
 export function setMomentLocale(locale) {
@@ -38,7 +39,7 @@ export default class ScrollCalendar extends Component {
       if(this.props.onSelect) {
         this.props.onSelect({
           startDate: value,
-          endDate: undefined 
+          endDate: undefined
         });
       }
     } else if(selectionState === PERIOD_SELECTION_STATES.ONE_DATE_SELECTED) {
@@ -58,6 +59,22 @@ export default class ScrollCalendar extends Component {
           });
         }
       }
+    }
+  }
+
+  setSelectedDate(date) {
+    this.setState({
+      selectedDate: date
+    });
+  }
+
+  componentDidMount() {
+    this.setSelectedDate(this.props.selectedDate);
+    let element = document.getElementById(
+      moment(this.props.selectedDate, "DD/MMM/YYYY").format("MMMM-YYYY")
+    );
+    if (element) {
+      element.scrollIntoView();
     }
   }
 
@@ -132,7 +149,11 @@ export const RenderMonthCard = props => {
 };
 
 export const RenderMonthHeader = props => {
-  let month = props.date.format(props.monthFormat);
+  let month = ucfirst(
+    moment(props.date)
+      .locale(moment.locale())
+      .format(props.monthFormat)
+  );
   let year = props.date.format(props.yearFormat);
   return (
     <p className="month-title">
@@ -228,7 +249,7 @@ export const RenderDays = ({
   let renderDays = () => {
     let elements = [];
     let now = moment(date, 'DD/MMM/YYYY');
-    let dayProps; 
+    let dayProps;
     for (let i = 1; i <= daysInMonth; i++) {
       let day = now.clone();
       dayProps = {

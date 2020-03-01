@@ -64,7 +64,7 @@ module.exports =
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 130);
+/******/ 	return __webpack_require__(__webpack_require__.s = 131);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -1923,7 +1923,7 @@ module.exports =
             try {
                 oldLocale = globalLocale._abbr;
                 var aliasedRequire = require;
-                __webpack_require__(131)("./" + name);
+                __webpack_require__(132)("./" + name);
                 getSetGlobalLocale(oldLocale);
             } catch (e) {}
         }
@@ -4674,7 +4674,7 @@ module.exports =
 
 })));
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(132)(module)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(133)(module)))
 
 /***/ }),
 /* 1 */
@@ -16906,12 +16906,25 @@ function isDisabled(minDate, currentDate, maxDate) {
 
 /***/ }),
 /* 129 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = function(s) {
+  return s.substr(0, 1).toUpperCase() + s.substring(1);
+};
+
+
+
+/***/ }),
+/* 130 */
 /***/ (function(module, exports) {
 
 module.exports = require("react");
 
 /***/ }),
-/* 130 */
+/* 131 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -16928,13 +16941,17 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 exports.setMomentLocale = setMomentLocale;
 
-var _react = __webpack_require__(129);
+var _react = __webpack_require__(130);
 
 var _react2 = _interopRequireDefault(_react);
 
 var _moment = __webpack_require__(0);
 
 var _moment2 = _interopRequireDefault(_moment);
+
+var _ucfirst = __webpack_require__(129);
+
+var _ucfirst2 = _interopRequireDefault(_ucfirst);
 
 var _utils = __webpack_require__(128);
 
@@ -17009,6 +17026,22 @@ var ScrollCalendar = function (_Component) {
             });
           }
         }
+      }
+    }
+  }, {
+    key: 'setSelectedDate',
+    value: function setSelectedDate(date) {
+      this.setState({
+        selectedDate: date
+      });
+    }
+  }, {
+    key: 'componentDidMount',
+    value: function componentDidMount() {
+      this.setSelectedDate(this.props.selectedDate);
+      var element = document.getElementById((0, _moment2.default)(this.props.selectedDate, "DD/MMM/YYYY").format("MMMM-YYYY"));
+      if (element) {
+        element.scrollIntoView();
       }
     }
   }, {
@@ -17087,7 +17120,7 @@ var RenderMonthCard = exports.RenderMonthCard = function RenderMonthCard(props) 
 };
 
 var RenderMonthHeader = exports.RenderMonthHeader = function RenderMonthHeader(props) {
-  var month = props.date.format(props.monthFormat);
+  var month = (0, _ucfirst2.default)((0, _moment2.default)(props.date).locale(_moment2.default.locale()).format(props.monthFormat));
   var year = props.date.format(props.yearFormat);
   return _react2.default.createElement(
     'p',
@@ -17304,7 +17337,7 @@ ScrollCalendar.defaultProps = {
 };
 
 /***/ }),
-/* 131 */
+/* 132 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var map = {
@@ -17577,10 +17610,10 @@ webpackContext.keys = function webpackContextKeys() {
 };
 webpackContext.resolve = webpackContextResolve;
 module.exports = webpackContext;
-webpackContext.id = 131;
+webpackContext.id = 132;
 
 /***/ }),
-/* 132 */
+/* 133 */
 /***/ (function(module, exports) {
 
 module.exports = function(module) {

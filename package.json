@@ -29,7 +29,6 @@
   },
   "dependencies": {
     "moment": "^2.24.0",
-    "react": "^15.5.4",
     "ucfirst": "^1.0.0"
   },
   "scripts": {
